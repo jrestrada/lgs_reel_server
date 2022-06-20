@@ -1,8 +1,8 @@
 #Request
-int16 larequesta
+pipecrawler/Crawlpattern crawlercommand
 ---
 #Result
-int16 resultado
+bool successfulcrawl
 ---
 #Feedback
 int16 count
