@@ -1,0 +1,8 @@
+#Request
+int16 larequesta
+---
+#Result
+int16 resultado
+---
+#Feedback
+int16 count
