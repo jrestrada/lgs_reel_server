@@ -101,7 +101,7 @@ class CrawlactionServer(Node):
         else: 
             self.get_logger().info("Executing single command")
             executeCommands(current_commands_list)
-            self._crawl_counter+=1
+            self._crawl_counter +=1
             feedback_msg = Crawlaction.Feedback()
             feedback_msg.count = self._crawl_counter
             goal_handle.publish_feedback(feedback_msg)

@@ -6,6 +6,6 @@ def generate_launch_description():
         Node(
             package='pipecrawler',
             executable='server',
-            
+            output = 'screen'
         )
     ])
