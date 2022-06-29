@@ -26,7 +26,7 @@ from rclpy.action import ActionServer
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
 from std_msgs.msg import Int16
-
+from gpiozero import LED as gpio
 
 def gb__on():
     print("GB on Test")
@@ -49,17 +49,13 @@ def gf__off():
 def none():
     print("none")
 
-gripper_command_names = {
-    1:"gb.on",
-    2:"gb.off",
-    3:"e.on()",
-    4:"e.off()",
-    5:"gf.on()",
-    6:"gf.off()",
-    0:"none()"
-}
+d = 2.25
+gf = gpio(18)
+e = gpio(17)
+gb = gpio(22)
 
-gripper_commands = {
+
+gripper_commands_consolever = {
     1:gb__on,
     2:gb__off,
     3:e__on,
@@ -69,10 +65,20 @@ gripper_commands = {
     0:none
 }
 
+gripper_commands = {
+    1:gb.on,
+    2:gb.off,
+    3:e.on,
+    4:e.off,
+    5:gf.on,
+    6:gf.off,
+    0:none
+}
+
 def executeCommands(command_list):
     for i in range(len(command_list)):
             gripper_commands[command_list[i]]()
-            time.sleep(0.2)
+            time.sleep(d)
 
 class CrawlactionServer(Node):
     def __init__(self):
