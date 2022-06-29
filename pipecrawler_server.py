@@ -28,10 +28,8 @@ from rclpy.action import GoalResponse
 from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
-from std_msgs.msg import Int16
+from std_msgs.msg import Int32
 # from gpiozero import LED as gpio
-
-
 
 def gb__on():
     print("GB on Test")
@@ -71,8 +69,7 @@ d = 1
 # e = gpio(17)
 # gb = gpio(22)
 
-#Use when 
-
+#Use following when using control box 
 
 # gripper_commands = {
 #     1:gb.on,
@@ -92,7 +89,7 @@ def executeCommands(command_list):
 class CrawlactionServer(Node):
     def __init__(self):
         super().__init__('pipecrawler_server')  # Node instance name ()must be matched)
-
+        self.get_logger().info('Initializing')
         self._crawl_counter = 0
         self._goal_lock = threading.Lock()
         self._goal_handle = None
@@ -147,7 +144,6 @@ class CrawlactionServer(Node):
         else: 
             self.get_logger().info("Executing single command")
             executeCommands(current_commands_list)
-            self._crawl_counter +=1
             feedback_msg = Crawlaction.Feedback()
             feedback_msg.count = self._crawl_counter
             goal_handle.publish_feedback(feedback_msg)
