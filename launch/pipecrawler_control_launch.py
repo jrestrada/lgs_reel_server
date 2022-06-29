@@ -5,7 +5,7 @@ def generate_launch_description():
     return LaunchDescription([
         Node(
             package='pipecrawler',
-            executable='server',
+            executable='pipecrawler_server.py',
             output = 'screen'
         )
     ])
