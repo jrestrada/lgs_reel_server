@@ -2,7 +2,7 @@
 
 """
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Description:
+Description: :)
 Action Server that controls a pipe crawler's pneumatics
 through raspberry pi pins, relay, and solenoid valves
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -23,10 +23,13 @@ import time
 import rclpy
 from pipecrawler.action import Crawlaction
 from rclpy.action import ActionServer
+from rclpy.action import CancelResponse
+from rclpy.action import GoalResponse
+from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
 from std_msgs.msg import Int16
-from gpiozero import LED as gpio
+# from gpiozero import LED as gpio
 
 def gb__on():
     print("GB on Test")
@@ -50,9 +53,9 @@ def none():
     print("none")
 
 d = 2.25
-gf = gpio(18)
-e = gpio(17)
-gb = gpio(22)
+# gf = gpio(18)
+# e = gpio(17)
+# gb = gpio(22)
 
 
 gripper_commands_consolever = {
@@ -65,34 +68,58 @@ gripper_commands_consolever = {
     0:none
 }
 
-gripper_commands = {
-    1:gb.on,
-    2:gb.off,
-    3:e.on,
-    4:e.off,
-    5:gf.on,
-    6:gf.off,
-    0:none
-}
+# gripper_commands = {
+#     1:gb.on,
+#     2:gb.off,
+#     3:e.on,
+#     4:e.off,
+#     5:gf.on,
+#     6:gf.off,
+#     0:none
+# }
 
 def executeCommands(command_list):
     for i in range(len(command_list)):
-            gripper_commands[command_list[i]]()
+            gripper_commands_consolever[command_list[i]]()
             time.sleep(d)
 
 class CrawlactionServer(Node):
     def __init__(self):
         super().__init__('pipecrawler_server')  # Node instance name
 
+        self._crawl_counter = 0
         self._action_server = ActionServer(
             self,                               # Node
             Crawlaction,                        # Action Type, imported
             'crawl_through_pipe',               # Action Name (Must be matched in other nodes or commands)
-            self.execute_callback_funct)        # Callback Function to execute
+            execute_callback =self.execute_callback,        # Callback Function to execute
+            goal_callback = self.goal_callback,
+            handle_accepted_callback=self.handle_accepted_callback,
+            cancel_callback=self.cancel_callback,
+            callback_group=ReentrantCallbackGroup())
+        
+    def handle_accepted_callback(self, goal_handle):
+        with self._goal_lock:
+            # This server only allows one goal at a time
+            if self._goal_handle is not None and self._goal_handle.is_active:
+                self.get_logger().info('Aborting previous goal')
+                # Abort the existing goal
+                self._goal_handle.abort()
+            self._goal_handle = goal_handle
 
-        self._crawl_counter = 0
+        goal_handle.execute()
 
-    def execute_callback_funct(self, goal_handle):
+    def goal_callback(self, goal_request):
+        """Accept or reject a client request to begin an action."""
+        self.get_logger().info('Received goal request')
+        return GoalResponse.ACCEPT
+
+    def cancel_callback(self, goal):
+        """Accept or reject a client request to cancel an action."""
+        self.get_logger().info('Received cancel request')
+        return CancelResponse.ACCEPT
+
+    def execute_callback(self, goal_handle):
         current_commands_list = goal_handle.request.crawlercommand.crawlpattern
 
         if goal_handle.request.crawlercommand.continuous:
