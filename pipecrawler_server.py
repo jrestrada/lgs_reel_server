@@ -31,6 +31,8 @@ from rclpy.node import Node
 from std_msgs.msg import Int16
 # from gpiozero import LED as gpio
 
+
+
 def gb__on():
     print("GB on Test")
 
@@ -51,14 +53,7 @@ def gf__off():
 
 def none():
     print("none")
-
-d = 1
-# d = 2.25
-# gf = gpio(18)
-# e = gpio(17)
-# gb = gpio(22)
-
-
+    
 gripper_commands_consolever = {
     1:gb__on,
     2:gb__off,
@@ -68,6 +63,16 @@ gripper_commands_consolever = {
     6:gf__off,
     0:none
 }
+
+d = 1
+
+# d = 2.25
+# gf = gpio(18)
+# e = gpio(17)
+# gb = gpio(22)
+
+#Use when 
+
 
 # gripper_commands = {
 #     1:gb.on,
