@@ -16,7 +16,7 @@ Subscription Topics:
     pipecrawler/Crawlpattern
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
-
+import threading
 from argparse import Action
 from os import pipe
 import time
@@ -52,7 +52,8 @@ def gf__off():
 def none():
     print("none")
 
-d = 2.25
+d = 1
+# d = 2.25
 # gf = gpio(18)
 # e = gpio(17)
 # gb = gpio(22)
@@ -85,9 +86,11 @@ def executeCommands(command_list):
 
 class CrawlactionServer(Node):
     def __init__(self):
-        super().__init__('pipecrawler_server')  # Node instance name
+        super().__init__('pipecrawler_server')  # Node instance name ()must be matched)
 
         self._crawl_counter = 0
+        self._goal_lock = threading.Lock()
+        self._goal_handle = None
         self._action_server = ActionServer(
             self,                               # Node
             Crawlaction,                        # Action Type, imported
@@ -124,13 +127,18 @@ class CrawlactionServer(Node):
 
         if goal_handle.request.crawlercommand.continuous:
             self.get_logger().info("Executing continuous crawl command")
-            while True:
+            while goal_handle.is_active:
+                
+                if goal_handle.is_cancel_requested:
+                    goal_handle.canceled()
+                    self.get_logger().info('Goal canceled')
+                
                 executeCommands(current_commands_list)
                 self._crawl_counter += 1
                 feedback_msg = Crawlaction.Feedback()
                 feedback_msg.count = self._crawl_counter
                 goal_handle.publish_feedback(feedback_msg)
-                
+                              
         else: 
             self.get_logger().info("Executing single command")
             executeCommands(current_commands_list)
@@ -138,8 +146,9 @@ class CrawlactionServer(Node):
             feedback_msg = Crawlaction.Feedback()
             feedback_msg.count = self._crawl_counter
             goal_handle.publish_feedback(feedback_msg)
+            self.get_logger().info("Goal Succeeded")
+            goal_handle.succeed()
         
-        goal_handle.succeed()
         resultant = Crawlaction.Result()
         resultant.successfulcrawl = True
         return resultant
