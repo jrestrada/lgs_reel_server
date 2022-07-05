@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(pipecrawler)
+project(reel)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -11,15 +11,15 @@ find_package(rosidl_default_generators REQUIRED)
 find_package(std_msgs REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
-  "msg/Crawlpattern.msg"
-  "action/Crawlaction.action"
+  "msg/Reelmessage.msg"
+  "action/Reelaction.action"
   DEPENDENCIES std_msgs
 )
 
 install(
   PROGRAMS
-  launch/pipecrawler_launch.py
-  pipecrawler_server.py
+  launch/reel_launch.py
+  reel_server.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

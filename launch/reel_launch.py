@@ -4,8 +4,8 @@ from launch_ros.actions import Node
 def generate_launch_description():
     return LaunchDescription([
         Node(
-            package="pipecrawler",
-            executable="pipecrawler_server.py",
+            package="reel",
+            executable="reel_server.py",
             output="screen"
         ),
     ])
