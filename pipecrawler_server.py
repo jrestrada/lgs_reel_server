@@ -2,7 +2,7 @@
 
 """
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Description: :)
+Description: :)))
 Action Server that controls a pipe crawler's pneumatics
 through raspberry pi pins, relay, and solenoid valves
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -89,7 +89,7 @@ def executeCommands(command_list):
 class CrawlactionServer(Node):
     def __init__(self):
         super().__init__('pipecrawler_server')  # Node instance name ()must be matched)
-        self.get_logger().info('Initializing')
+        self.get_logger().info('Initializing Pipecrawler Server')
         self._crawl_counter = 0
         self._goal_lock = threading.Lock()
         self._goal_handle = None

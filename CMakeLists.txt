@@ -18,7 +18,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 
 install(
   PROGRAMS
-  launch/pipecrawler_control_launch.py
+  launch/pipecrawler_launch.py
   pipecrawler_server.py
   DESTINATION lib/${PROJECT_NAME}
 )
