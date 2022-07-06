@@ -3,13 +3,12 @@
 """
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Description: :)))
-Action Server that controls a pipe crawler's pneumatics
-through raspberry pi pins, relay, and solenoid valves
+Action Server that Distributes commands to reel through cmd_vel and mechanical winder through serial
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Test with: 
 
-ros2 action send_goal --feedback activate_reel reel/action/Reelaction '{reelcommand: {reel_vel: 1, reel_dir: 'wind', continuous: True}}'
-ros2 action send_goal --feedback activate_reel reel/action/Reelaction '{reelcommand: {reel_vel: 1, reel_dir: 'wind', continuous: False}}'
+ros2 action send_goal --feedback activate_reel reel/action/Reelaction '{reelcommand: {reel_vel: 1, interval: '2.0', continuous: True}}'
+ros2 action send_goal --feedback activate_reel reel/action/Reelaction '{reelcommand: {reel_vel: 1, interval: '2.0', continuous: False}}'
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Subscription Topics:
@@ -35,8 +34,8 @@ from std_msgs.msg import Int16
 from std_msgs.msg import String
 
 t = 2
-def testdelay():
-    time.sleep(t)
+def testdelay(interval = t):
+    time.sleep(interval)
 
 class ReelActionServer(Node):
     def __init__(self):
@@ -83,13 +82,13 @@ class ReelActionServer(Node):
     def publish_messages(self, message):
         self.cmd_vel_msg.linear.x = float(message)
         self.get_logger().info('Publishing: "%s"' % self.cmd_vel_msg.linear.x)
-        self.get_logger().info('Direction: "%s"' % self._goal_handle.request.reelcommand.reel_dir)
+        self.get_logger().info('Interval: "%s"' % self._goal_handle.request.reelcommand.interval)
         self.publisher_.publish(self.cmd_vel_msg)
         t_units_abs = abs(message)
         t_units_abs.to_bytes(2, byteorder='big')
-        # self.ser.write(t_units_abs)
-        # self.ser.write(b"\n")
-        time.sleep(t)
+        self.ser.write(t_units_abs)
+        self.ser.write(b"\n")
+        time.sleep(self._goal_handle.request.reelcommand.interval)
 
     def execute_callback(self, goal_handle):
         if goal_handle.request.reelcommand.continuous:

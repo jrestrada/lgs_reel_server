@@ -1,3 +1,3 @@
 int16 reel_vel
-string reel_dir
+float32 interval
 bool continuous
