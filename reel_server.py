@@ -33,16 +33,12 @@ from geometry_msgs.msg import Twist
 from std_msgs.msg import Int16
 from std_msgs.msg import String
 
-t = 2
-def testdelay(interval = t):
-    time.sleep(interval)
-
 class ReelActionServer(Node):
     def __init__(self):
         super().__init__('pipecrawler_server')  # Node instance name ()must be matched)
         self.get_logger().info('Initializing Reel Server')
-        # self.ser = serial.Serial('/dev/ttyUSB0', 9600, timeout=1)
-        # self.ser.reset_input_buffer()
+        self.ser = serial.Serial('/dev/ttyUSB0', 9600, timeout=1)
+        self.ser.reset_input_buffer()
         self._revolution_counter = 0
         self._goal_lock   = threading.Lock()
         self._goal_handle = None
@@ -66,7 +62,6 @@ class ReelActionServer(Node):
                 # Abort the existing goal
                 self._goal_handle.abort()
             self._goal_handle = goal_handle
-
         goal_handle.execute()
 
     def goal_callback(self, goal_request):
@@ -79,15 +74,14 @@ class ReelActionServer(Node):
         self.get_logger().info('Received cancel request')
         return CancelResponse.ACCEPT
 
-    def publish_messages(self, message):
+    def publish_messages(self, message, newdir = 0):
         self.cmd_vel_msg.linear.x = float(message)
-        self.get_logger().info('Publishing: "%s"' % self.cmd_vel_msg.linear.x)
-        self.get_logger().info('Interval: "%s"' % self._goal_handle.request.reelcommand.interval)
+        self.get_logger().info('Publishing cmd_vel: "%s"' % self.cmd_vel_msg.linear.x)
         self.publisher_.publish(self.cmd_vel_msg)
         t_units_abs = abs(message)
-        t_units_abs.to_bytes(2, byteorder='big')
-        self.ser.write(t_units_abs)
-        self.ser.write(b"\n")
+        pub_str = "<Hello," + str(newdir) + "," + str(t_units_abs)  + ">"
+        pub_bytes = pub_str.encode('utf-8')
+        self.ser.write(pub_bytes)
         time.sleep(self._goal_handle.request.reelcommand.interval)
 
     def execute_callback(self, goal_handle):
