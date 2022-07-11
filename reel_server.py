@@ -2,8 +2,8 @@
 
 """
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Description: :)))
-Action Server that Distributes commands to reel through cmd_vel and mechanical winder through serial
+Description: 
+Action Server that distributes commands to reel through cmd_vel and mechanical winder through serial communication
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Test with: 
 
@@ -15,7 +15,7 @@ Subscription Topics:
     reel/Reelmessage
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
-
+import math
 import threading
 from argparse import Action
 from os import pipe
@@ -33,6 +33,8 @@ from geometry_msgs.msg import Twist
 from std_msgs.msg import Int16
 from std_msgs.msg import String
 
+sign = lambda x: math.copysign(1, x)
+
 class ReelActionServer(Node):
     def __init__(self):
         super().__init__('pipecrawler_server')  # Node instance name ()must be matched)
@@ -40,6 +42,7 @@ class ReelActionServer(Node):
         self.ser = serial.Serial('/dev/ttyUSB0', 9600, timeout=1)
         self.ser.reset_input_buffer()
         self._revolution_counter = 0
+        self._previous_dir = 0
         self._goal_lock   = threading.Lock()
         self._goal_handle = None
         self.publisher_   = self.create_publisher(Twist, 'cmd_vel', 10)
@@ -75,6 +78,11 @@ class ReelActionServer(Node):
         return CancelResponse.ACCEPT
 
     def publish_messages(self, message, newdir = 0):
+        
+        if (sign(message) != self._previous_dir and message != 0):
+            newdir = 1
+            self._previous_dir = sign(message)
+
         self.cmd_vel_msg.linear.x = float(message)
         self.get_logger().info('Publishing cmd_vel: "%s"' % self.cmd_vel_msg.linear.x)
         self.publisher_.publish(self.cmd_vel_msg)
