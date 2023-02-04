@@ -37,7 +37,7 @@ sign = lambda x: math.copysign(1, x)
 
 class ReelActionServer(Node):
     def __init__(self):
-        super().__init__('pipecrawler_server')  # Node instance name ()must be matched)
+        super().__init__('reel_server')  # Node instance name ()must be matched)
         self.get_logger().info('Initializing Reel Server')
         self.ser = serial.Serial('/dev/ttyUSB0', 9600, timeout=1)
         self.ser.reset_input_buffer()
@@ -53,9 +53,9 @@ class ReelActionServer(Node):
             'activate_reel',                              
             execute_callback =self.execute_callback,      
             goal_callback = self.goal_callback,
-            handle_accepted_callback=self.handle_accepted_callback,
-            cancel_callback=self.cancel_callback,
-            callback_group=ReentrantCallbackGroup())
+            handle_accepted_callback =self.handle_accepted_callback,
+            cancel_callback =self.cancel_callback,
+            callback_group = ReentrantCallbackGroup())
     
     def handle_accepted_callback(self, goal_handle):
         with self._goal_lock:
