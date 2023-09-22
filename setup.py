@@ -1,6 +1,6 @@
 from setuptools import setup
 
-package_name = 'reel'
+package_name = 'lgs_reel_server'
 
 setup(
     name=package_name,

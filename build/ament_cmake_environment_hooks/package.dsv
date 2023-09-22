@@ -1,0 +1,4 @@
+source;share/reel/local_setup.bash
+source;share/reel/local_setup.dsv
+source;share/reel/local_setup.sh
+source;share/reel/local_setup.zsh

@@ -1,0 +1,25 @@
+// generated from rosidl_adapter/resource/action.idl.em
+// with input from reel/action/Reelaction.action
+// generated code does not contain a copyright notice
+
+#include "reel/msg/Reelmessage.idl"
+
+module reel {
+  module action {
+    @verbatim (language="comment", text=
+      "Request or Goal")
+    struct Reelaction_Goal {
+      reel::msg::Reelmessage reelcommand;
+    };
+    @verbatim (language="comment", text=
+      "Result")
+    struct Reelaction_Result {
+      boolean successfulturn;
+    };
+    @verbatim (language="comment", text=
+      "Feedback")
+    struct Reelaction_Feedback {
+      int32 revs;
+    };
+  };
+};

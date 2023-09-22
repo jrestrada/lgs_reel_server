@@ -7,12 +7,9 @@ Action Server that distributes commands to reel through cmd_vel and mechanical w
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Test with: 
 
-ros2 action send_goal --feedback activate_reel reel/action/Reelaction '{reelcommand: {reel_vel: 1, interval: '2.0', continuous: True}}'
-ros2 action send_goal --feedback activate_reel reel/action/Reelaction '{reelcommand: {reel_vel: 1, interval: '2.0', continuous: False}}'
+ros2 action send_goal --feedback turn_reel lgs_interfaces/action/Reel '{command: {velocity: 1, interval: '2.0', continuous: True}}'
+ros2 action send_goal --feedback turn_reel lgs_interfaces/action/Reel '{command: {velocity: 1, interval: '2.0', continuous: False}}'
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Subscription Topics:
-    reel/Reelmessage
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 import math
@@ -22,7 +19,7 @@ from os import pipe
 import serial
 import time
 import rclpy
-from reel.action import Reelaction
+from lgs_interfaces.action import Reel
 from rclpy.action import ActionServer
 from rclpy.action import CancelResponse
 from rclpy.action import GoalResponse
@@ -38,19 +35,19 @@ sign = lambda x: math.copysign(1, x)
 class ReelActionServer(Node):
     def __init__(self):
         super().__init__('reel_server')  # Node instance name ()must be matched)
-        self.get_logger().info('Initializing Reel Server')
-        self.ser = serial.Serial('/dev/ttyUSB0', 9600, timeout=1)
+        self.get_logger().info('Initializing reel control node')
+        self.ser = serial.Serial('/dev/arduino_nano', 9600, timeout=1)
         self.ser.reset_input_buffer()
         self._revolution_counter = 0
         self._previous_dir = 0
         self._goal_lock   = threading.Lock()
         self._goal_handle = None
-        self.publisher_   = self.create_publisher(Twist, 'cmd_vel', 10)
-        self.cmd_vel_msg = Twist()
+        self._publisher   = self.create_publisher(Twist, 'cmd_vel', 10)
+        self._cmd_vel_msg = Twist()
         self._action_server = ActionServer(
             self,                                           
-            Reelaction,                                     
-            'activate_reel',                              
+            Reel,                                     
+            'turn_reel',                              
             execute_callback =self.execute_callback,      
             goal_callback = self.goal_callback,
             handle_accepted_callback =self.handle_accepted_callback,
@@ -78,22 +75,21 @@ class ReelActionServer(Node):
         return CancelResponse.ACCEPT
 
     def publish_messages(self, message, newdir = 0):
-        
         if (sign(message) != self._previous_dir and message != 0):
             newdir = 1
             self._previous_dir = sign(message)
 
-        self.cmd_vel_msg.linear.x = float(message)
-        self.get_logger().info('Publishing cmd_vel: "%s"' % self.cmd_vel_msg.linear.x)
-        self.publisher_.publish(self.cmd_vel_msg)
+        self._cmd_vel_msg.linear.x = float(message)
+        self.get_logger().info('Publishing cmd_vel: "%s"' % self._cmd_vel_msg.linear.x)
+        self._publisher.publish(self._cmd_vel_msg)
         t_units_abs = abs(message)
         pub_str = "<Hello," + str(newdir) + "," + str(t_units_abs)  + ">"
         pub_bytes = pub_str.encode('utf-8')
         self.ser.write(pub_bytes)
-        time.sleep(self._goal_handle.request.reelcommand.interval)
+        time.sleep(self._goal_handle.request.command.interval)
 
     def execute_callback(self, goal_handle):
-        if goal_handle.request.reelcommand.continuous:
+        if goal_handle.request.command.continuous:                                                      
             self.get_logger().info("Executing continuous reel command")
             while goal_handle.is_active:     
                 
@@ -101,22 +97,22 @@ class ReelActionServer(Node):
                     goal_handle.canceled()
                     self.get_logger().info('Cancelling previous goal')
                 
-                self.publish_messages(goal_handle.request.reelcommand.reel_vel)
+                self.publish_messages(goal_handle.request.command.velocity)
                 self._revolution_counter += 1
-                feedback_msg = Reelaction.Feedback()
-                feedback_msg.revs = self._revolution_counter
+                feedback_msg = Reel.Feedback()
+                feedback_msg.turns = self._revolution_counter
                 goal_handle.publish_feedback(feedback_msg)
-                              
+
         else: 
             self.get_logger().info("Executing single command")
-            self.publish_messages(goal_handle.request.reelcommand.reel_vel)
-            feedback_msg = Reelaction.Feedback()
-            feedback_msg.revs = self._revolution_counter
+            self.publish_messages(goal_handle.request.command.velocity)
+            feedback_msg = Reel.Feedback()
+            feedback_msg.turns = self._revolution_counter
             goal_handle.publish_feedback(feedback_msg)
             self.get_logger().info("Goal Succeeded")
             goal_handle.succeed()
         
-        resultant = Reelaction.Result()
+        resultant = Reel.Result()
         resultant.successfulturn = True
         return resultant
 

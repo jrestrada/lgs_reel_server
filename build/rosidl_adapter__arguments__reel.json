@@ -1,0 +1,7 @@
+{
+  "package_name": "reel",
+  "non_idl_tuples": [
+    "/home/reel/ros2_ws/src/reel:msg/Reelmessage.msg",
+    "/home/reel/ros2_ws/src/reel:action/Reelaction.action"
+  ]
+}
