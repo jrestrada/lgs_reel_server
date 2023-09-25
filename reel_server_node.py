@@ -9,7 +9,6 @@ Test with:
 
 ros2 action send_goal --feedback turn_reel lgs_interfaces/action/Reel '{command: {velocity: 1, interval: '2.0', continuous: True}}'
 ros2 action send_goal --feedback turn_reel lgs_interfaces/action/Reel '{command: {velocity: 1, interval: '2.0', continuous: False}}'
-
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 import math

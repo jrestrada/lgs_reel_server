@@ -1,8 +1,0 @@
-#Request or Goal
-reel/Reelmessage reelcommand
----
-#Result
-bool successfulturn
----
-#Feedback
-int32 revs
