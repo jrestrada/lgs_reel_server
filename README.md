@@ -19,6 +19,6 @@ determined by the field *interval*, and either a single time, or ongoingly, as s
 
 Ongoing actions will be interrupted when new ones are accepted.  
 
-Additionally, the node publishes a Serial command to the microcontroller which drives the 
+Additionally, the node sends a Serial mesage to the microcontroller which drives the 
 tether-guiding carriage, matching the reel's
 angular velocity and direction. The serial device is expected to be named /dev/arduino_nano. 
